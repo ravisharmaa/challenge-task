@@ -3,12 +3,21 @@
 namespace App\Http\Repository;
 
 use App\Http\ValueObject\WorkerShiftValueObject;
+use App\Http\ValueObject\WorkerValueObject;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 interface WorkerRepositoryInterface
 {
     public function assignShiftToWorker(WorkerShiftValueObject $workerShiftValueObject);
 
-    public function getAllWorkers();
+    public function getAllWorkers(): Builder;
 
-    public function createWorker();
+    public function createWorker(WorkerValueObject $workerValueObject);
+
+    public function getShiftForWorker(string $workerId, ?string $date): Collection;
+
+    public function updateWorker(string $workerId, WorkerValueObject $workerValueObject): void;
+
+    public function deleteWorker(string $workerId): void;
 }

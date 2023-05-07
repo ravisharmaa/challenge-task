@@ -65,4 +65,15 @@ class WorkerShiftValueObject
 
         return implode(', ', $labels);
     }
+
+    public function toArray(): array
+    {
+        return [
+            'start' => $this->getStartAt(),
+            'end' => $this->getEndAt(),
+            'date' => $this->getDate(),
+            'shift' => $this->getShiftSlot(),
+            'worker' => $this->getWorkerId()
+        ];
+    }
 }

@@ -11,6 +11,8 @@ class Worker extends Model
 {
     use HasFactory;
 
+    protected $guarded = ['id'];
+
     public function shift(): HasMany
     {
         return $this->hasMany(Shift::class);

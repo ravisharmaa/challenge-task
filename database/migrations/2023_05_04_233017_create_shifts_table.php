@@ -18,7 +18,7 @@ return new class extends Migration
             $table->time('start_at');
             $table->time('end_at');
             $table->string('slot');
-            $table->unique(['work_date','slot','worker_id']);
+            $table->unique(['date','slot','worker_id']);
             $table->timestamps();
         });
     }

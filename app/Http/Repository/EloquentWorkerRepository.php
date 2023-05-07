@@ -2,16 +2,29 @@
 
 namespace App\Http\Repository;
 
+use App\Exceptions\CouldNotCreateWorkerException;
 use App\Exceptions\InvalidDataException;
+use App\Exceptions\WorkerException;
+use App\Exceptions\WorkerNotFoundException;
 use App\Http\ValueObject\WorkerShiftValueObject;
+use App\Http\ValueObject\WorkerValueObject;
 use App\Models\Worker;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
-use Illuminate\Support\Collection;
+use Psr\Log\LoggerInterface;
 
 class EloquentWorkerRepository implements WorkerRepositoryInterface
 {
+
+    public function __construct(
+        private readonly LoggerInterface $logger
+    )
+    {
+
+    }
+
     public function getWorkerModelQueryObject(): Builder
     {
         return Worker::query();
@@ -41,17 +54,97 @@ class EloquentWorkerRepository implements WorkerRepositoryInterface
                 'date' => $workerShiftValueObject->getDate()
             ]);
         } catch (QueryException $exception) {
+            $this->logger->info('Error while adding shift to a worker', [
+                'exception' => $exception->getMessage(),
+                'data' => $workerShiftValueObject->toArray()
+            ]);
             throw new InvalidDataException('A worker cannot work for multiple shifts in a day.');
         }
     }
 
-    public function getAllWorkers(): Collection
+    public function getAllWorkers(): Builder
     {
-        return $this->getWorkerModelQueryObject()->get();
+        return $this->getWorkerModelQueryObject();
     }
 
-    public function createWorker()
+    public function createWorker(WorkerValueObject $workerValueObject): void
     {
+        try {
+            $this->getWorkerModelQueryObject()->create($workerValueObject->toArray());
+        } catch (\Exception $exception) {
+            $this->logger->info('Error while creating a worker', [
+                'exception' => $exception->getMessage()
+            ]);
+            throw new CouldNotCreateWorkerException();
+        }
 
+    }
+
+    public function getShiftForWorker(string $workerId, ?string $date): Collection
+    {
+        /**
+         * @var $worker Worker
+         */
+        try {
+            $worker = $this->getWorkerModelQueryObject()->findOrFail($workerId);
+        } catch (ModelNotFoundException) {
+            throw new WorkerNotFoundException();
+        }
+
+        return $worker
+            ->shift()
+            ->when(!empty($date), function($query) use ($date){
+                return $query->where('date', '>=', $date);
+            })
+            ->get();
+    }
+
+    public function updateWorker(string $workerId, WorkerValueObject $workerValueObject): void
+    {
+        try {
+            /**
+             * @var $worker Worker
+             */
+            $worker = $this->getWorkerModelQueryObject()->findOrFail($workerId);
+        } catch (ModelNotFoundException) {
+            $this->logger->info('Worker not found', [
+                'worker' => $workerId
+            ]);
+            throw new WorkerNotFoundException();
+        }
+       try {
+           $worker->update($workerValueObject->toArray());
+       } catch (\Exception) {
+           $this->logger->info('Worker not updated', [
+               'worker' => $workerId
+           ]);
+
+           throw new WorkerException();
+       }
+
+    }
+
+    public function deleteWorker(string $workerId): void
+    {
+        try {
+            /**
+             * @var $worker Worker
+             */
+            $worker = $this->getWorkerModelQueryObject()->findOrFail($workerId);
+        } catch (ModelNotFoundException) {
+            $this->logger->info('Worker not found', [
+                'worker' => $workerId
+            ]);
+            throw new WorkerNotFoundException();
+        }
+        try {
+            $worker->delete();
+        } catch (\Exception) {
+            $this->logger->info('Worker not updated', [
+                'worker' => $workerId
+            ]);
+
+            throw new WorkerException();
+        }
     }
 }

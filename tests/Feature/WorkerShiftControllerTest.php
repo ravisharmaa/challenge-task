@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Http\ValueObject\WorkerShiftValueObject;
+use App\Models\Shift;
 use App\Models\Worker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -69,5 +70,11 @@ class WorkerShiftControllerTest extends TestCase
         ])->assertStatus(422);
 
         $this->assertDatabaseCount('shifts', 1);
+    }
+
+    public function test_it_gets_the_shift_of_a_worker_for_a_date()
+    {
+        Shift::factory()->count(20)->create();
+
     }
 }

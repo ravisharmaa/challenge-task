@@ -6,6 +6,7 @@ use App\Exceptions\InvalidDataException;
 use App\Http\Controllers\Controller;
 use App\Http\Repository\WorkerRepositoryInterface;
 use App\Http\Requests\WorkerShiftRequest;
+use App\Models\Worker;
 use Symfony\Component\HttpFoundation\Response;
 
 class WorkerShiftController extends Controller
@@ -14,6 +15,11 @@ class WorkerShiftController extends Controller
         private readonly WorkerRepositoryInterface $workerRepository
     )
     {
+    }
+
+    public function index(Worker $worker)
+    {
+        $this->workerRepository->getShiftForWorker($worker, request('date') ?? null);
     }
 
     public function store(WorkerShiftRequest $request): Response
