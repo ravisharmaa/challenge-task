@@ -8,7 +8,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 class HourDifference implements ValidationRule, DataAwareRule
 {
-    protected $data = [];
+    protected array $data = [];
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

@@ -41,10 +41,27 @@ class WorkerShiftController extends Controller
         ], 201);
     }
 
-    public function update(WorkerShiftRequest $request)
+    public function update(WorkerShiftRequest $request): Response
     {
         try {
             $this->workerRepository->updateWorkerShift($request->toValueObject());
+        } catch (WorkerException) {
+            return response([
+                'error' => 'Cannot update shift of worker'
+            ], 422);
+        }
+
+        return response([
+            'success' => [
+                'message' => 'Shift added successfully.'
+            ]
+        ], 201);
+    }
+
+    public function delete(string $workerId, string $shiftId)
+    {
+        try {
+            $this->workerRepository->deleteShift($workerId, $shiftId);
         } catch (WorkerException) {
             return response([
                 'error' => 'Cannot update shift of worker'

@@ -175,4 +175,29 @@ class EloquentWorkerRepository implements WorkerRepositoryInterface
             throw new WorkerException();
         }
     }
+
+    public function deleteShift(string $workerId, string $shiftId): void
+    {
+        try {
+            /**
+             * @var $worker Worker
+             */
+            $worker = $this->getWorkerModelQueryObject()->findOrFail($workerId);
+        } catch (ModelNotFoundException) {
+            $this->logger->info('Worker not found', [
+                'worker' => $workerId
+            ]);
+            throw new WorkerNotFoundException();
+        }
+        try {
+            $worker->shift()->where('id', $shiftId)->delete();
+        } catch (\Exception $exception) {
+            $this->logger->info('Worker shift not delete', [
+                'worker' => $workerId,
+                'shiftId' => $shiftId
+            ]);
+
+            throw new WorkerException();
+        }
+    }
 }

@@ -22,4 +22,6 @@ interface WorkerRepositoryInterface
     public function deleteWorker(string $workerId): void;
 
     public function updateWorkerShift(WorkerShiftValueObject $workerShiftValueObject): void;
+
+    public function deleteShift(string $workerId, string $shiftId): void;
 }
