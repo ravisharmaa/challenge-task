@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Http\ValueObject\WorkerShiftValueObject;
-use App\Models\Shift;
 use App\Models\Worker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -14,13 +13,13 @@ class WorkerShiftControllerTest extends TestCase
 
     public function test_it_validates_the_input_data()
     {
-        $this->postJson(route('worker-shift.create'))->assertUnprocessable();
+        $this->postJson(route('worker.shift.create'))->assertUnprocessable();
     }
 
     public function test_a_shift_should_have_at_least_8_hours_difference()
     {
         $worker = Worker::factory()->create();
-        $this->postJson(route('worker-shift.create'), [
+        $this->postJson(route('worker.shift.create'), [
             'worker_id' => $worker->id,
             'start_at' => '08:00:00',
             'date' => now()->format('Y-m-d'),
@@ -33,7 +32,7 @@ class WorkerShiftControllerTest extends TestCase
     public function test_a_worker_can_book_a_shift()
     {
         $worker = Worker::factory()->create();
-        $this->postJson(route('worker-shift.create'), [
+        $this->postJson(route('worker.shift.create'), [
             'worker_id' => $worker->id,
             'start_at' => '08:00:00',
             'date' => now()->format('Y-m-d'),
@@ -62,19 +61,13 @@ class WorkerShiftControllerTest extends TestCase
             'slot' => $valueObject->getShiftSlot(),
         ]);
 
-        $this->postJson(route('worker-shift.create'), [
+        $this->postJson(route('worker.shift.create'), [
             'worker_id' => $worker->id,
             'start_at' => '08:00:00',
             'date' => now()->format('Y-m-d'),
             'end_at' => '16:00:00'
-        ])->assertStatus(422);
+        ])->assertStatus(400);
 
         $this->assertDatabaseCount('shifts', 1);
-    }
-
-    public function test_it_gets_the_shift_of_a_worker_for_a_date()
-    {
-        Shift::factory()->count(20)->create();
-
     }
 }

@@ -53,7 +53,7 @@ class EloquentWorkerRepository implements WorkerRepositoryInterface
                 'slot' => $workerShiftValueObject->getShiftSlot(),
                 'date' => $workerShiftValueObject->getDate()
             ]);
-        } catch (QueryException $exception) {
+        } catch (\OutOfRangeException | QueryException $exception) {
             $this->logger->info('Error while adding shift to a worker', [
                 'exception' => $exception->getMessage(),
                 'data' => $workerShiftValueObject->toArray()
@@ -142,6 +142,34 @@ class EloquentWorkerRepository implements WorkerRepositoryInterface
         } catch (\Exception) {
             $this->logger->info('Worker not updated', [
                 'worker' => $workerId
+            ]);
+
+            throw new WorkerException();
+        }
+    }
+
+    public function updateWorkerShift(WorkerShiftValueObject $workerShiftValueObject): void
+    {
+        try {
+            /**
+             * @var $worker Worker
+             */
+            $worker = $this->getWorkerModelQueryObject()->findOrFail($workerShiftValueObject->getWorkerId());
+        } catch (ModelNotFoundException) {
+            $this->logger->info('Worker not found', [
+                'worker' => $workerShiftValueObject->getWorkerId()
+            ]);
+            throw new WorkerNotFoundException();
+        }
+        try {
+            $worker->shift()->where('date', $workerShiftValueObject->getDate())->update([
+                'start_at' => $workerShiftValueObject->getStartAt(),
+                'end_at' => $workerShiftValueObject->getEndAt(),
+                'slot' => $workerShiftValueObject->getShiftSlot()
+            ]);
+        } catch (\Exception $exception) {
+            $this->logger->info('Worker shift not updated', [
+                'worker' => $workerShiftValueObject
             ]);
 
             throw new WorkerException();
