@@ -20,9 +20,9 @@ class WorkerShiftRequest extends FormRequest
     {
         return [
             'worker_id' => 'required|exists:App\Models\Worker,id',
-            'day_id' => 'required|exists:App\Models\Day,id',
-            'start_at' => 'required|date_format:Y-m-d H:i:s',
-            'end_at' => ['required','date_format:Y-m-d H:i:s','after:start_at', new HourDifference]
+            'date' => 'required|date_format:Y-m-d',
+            'start_at' => 'required|date_format:H:i:s',
+            'end_at' => ['required','date_format:H:i:s','after:start_at', new HourDifference]
         ];
     }
 
@@ -30,7 +30,7 @@ class WorkerShiftRequest extends FormRequest
     {
         return new WorkerShiftValueObject(
             workerId: $this->get('worker_id'),
-            dayId: $this->get('day_id'),
+            date: $this->get('date'),
             startAt: $this->get('start_at'),
             endAt: $this->get('end_at')
         );
