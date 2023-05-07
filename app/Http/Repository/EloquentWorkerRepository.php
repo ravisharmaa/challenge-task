@@ -192,7 +192,7 @@ class EloquentWorkerRepository implements WorkerRepositoryInterface
         try {
             $worker->shift()->where('id', $shiftId)->delete();
         } catch (\Exception $exception) {
-            $this->logger->info('Worker shift not delete', [
+            $this->logger->info('Worker shift not deleted', [
                 'worker' => $workerId,
                 'shiftId' => $shiftId
             ]);

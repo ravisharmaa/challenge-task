@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Http\ValueObject\WorkerShiftValueObject;
+use App\Models\Shift;
 use App\Models\Worker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -69,5 +70,12 @@ class WorkerShiftControllerTest extends TestCase
         ])->assertStatus(400);
 
         $this->assertDatabaseCount('shifts', 1);
+    }
+
+    public function test_worker_can_delete_a_shift()
+    {
+        $shift = Shift::factory()->create();
+        $this->deleteJson(route('worker.shift.delete', ['workerId' => $shift->worker_id, 'shiftId' => $shift->id]))->assertOk();
+        $this->assertDatabaseCount('shifts', 0);
     }
 }

@@ -58,7 +58,7 @@ class WorkerShiftController extends Controller
         ], 201);
     }
 
-    public function delete(string $workerId, string $shiftId)
+    public function delete(string $workerId, string $shiftId): Response
     {
         try {
             $this->workerRepository->deleteShift($workerId, $shiftId);
@@ -72,6 +72,6 @@ class WorkerShiftController extends Controller
             'success' => [
                 'message' => 'Shift added successfully.'
             ]
-        ], 201);
+        ], 200);
     }
 }
