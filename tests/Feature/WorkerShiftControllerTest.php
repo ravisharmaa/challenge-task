@@ -21,9 +21,9 @@ class WorkerShiftControllerTest extends TestCase
         $worker = Worker::factory()->create();
         $this->postJson(route('worker-shift.create'), [
             'worker_id' => $worker->id,
-            'start_at' => now()->toTimeString(),
+            'start_at' => '08:00:00',
             'date' => now()->format('Y-m-d'),
-            'end_at' => now()->addHours(9)->toTimeString()
+            'end_at' => '12:00:00'
         ])->assertUnprocessable();
 
         $this->assertDatabaseCount('shifts', 0);
@@ -34,9 +34,9 @@ class WorkerShiftControllerTest extends TestCase
         $worker = Worker::factory()->create();
         $this->postJson(route('worker-shift.create'), [
             'worker_id' => $worker->id,
-            'start_at' => now()->toTimeString(),
+            'start_at' => '08:00:00',
             'date' => now()->format('Y-m-d'),
-            'end_at' => now()->addHours(8)->toTimeString()
+            'end_at' => '16:00:00'
         ]);
 
         $this->assertDatabaseCount('shifts', 1);
@@ -51,8 +51,8 @@ class WorkerShiftControllerTest extends TestCase
         $valueObject = new WorkerShiftValueObject(
             workerId: $worker->id,
             date: now()->format('Y-m-d'),
-            startAt: now()->toTimeString(),
-            endAt: now()->addHours(8)->toTimeString()
+            startAt: '08:00:00',
+            endAt: '16:00:00'
         );
         $worker->shift()->create([
             'date' => $valueObject->getDate(),
@@ -63,10 +63,10 @@ class WorkerShiftControllerTest extends TestCase
 
         $this->postJson(route('worker-shift.create'), [
             'worker_id' => $worker->id,
-            'date' => $valueObject->getDate(),
-            'start_at' => now()->toTimeString(),
-            'end_at' => now()->addHours(8)->toTimeString()
-        ]);
+            'start_at' => '08:00:00',
+            'date' => now()->format('Y-m-d'),
+            'end_at' => '16:00:00'
+        ])->assertStatus(422);
 
         $this->assertDatabaseCount('shifts', 1);
     }

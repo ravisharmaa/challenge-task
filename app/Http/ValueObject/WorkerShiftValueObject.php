@@ -37,11 +37,32 @@ class WorkerShiftValueObject
 
     public function getShiftSlot(): string
     {
-        $startAt = Carbon::createFromFormat('H:i:s', $this->getStartAt());
-        return match ($startAt) {
-            $startAt->between('00:00:00', '07:59:59') => '0-8',
-            $startAt->between('08:00:00', '15:59:59') => '8-16',
-            default => '16-24'
-        };
+        $startAt = Carbon::parse($this->getStartAt());
+        $endAt = Carbon::parse($this->getEndAt());
+
+        $ranges = [
+            ['start' => '00:00:00', 'end' => '08:00:00', 'label' => '0-8'],
+            ['start' => '08:00:00', 'end' => '16:00:00', 'label' => '8-16'],
+            ['start' => '16:00:00', 'end' => '23:59:59', 'label' => '16-24'],
+        ];
+
+        foreach ($ranges as $range) {
+            $start = Carbon::parse($range['start']);
+            $end = Carbon::parse($range['end']);
+            if ($startAt->between($start, $end) && $endAt->between($start, $end)) {
+                return $range['label'];
+            }
+        }
+
+        $labels = [];
+        foreach ($ranges as $range) {
+            $start = Carbon::parse($range['start']);
+            $end = Carbon::parse($range['end']);
+            if ($startAt->lt($end) && $endAt->gt($start)) {
+                $labels[] = $range['label'];
+            }
+        }
+
+        return implode(', ', $labels);
     }
 }
